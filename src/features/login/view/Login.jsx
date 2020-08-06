@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import React, { useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { useHistory } from 'react-router-dom';
 
+import Security from '../../../shared/functions/autenticacao/security';
 import { loginOperations } from '../redux';
 import Button from '../../../shared/components/button/Button';
 import Input from '../../../shared/components/input/Input';
@@ -9,12 +11,16 @@ import { Container, BoxInput } from './styles';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const history = useHistory();
 
   const dispatch = useDispatch();
-  const jwt = useSelector((state) => state.loginReducer.jwt);
   const getJwt = (body) => dispatch(loginOperations.getJwt(body));
 
-  console.log(jwt);
+  useEffect(() => {
+    if (Security.authorizationTokenExists()) {
+      history.push('/home');
+    }
+  }, []);
 
   const onChangeEmail = (event) => {
     setEmail(event.target.value);
@@ -28,6 +34,7 @@ const Login = () => {
     event.preventDefault();
     try {
       await getJwt({ email, password });
+      history.push('/home');
     } catch (e) {
       console.log(e);
     }
